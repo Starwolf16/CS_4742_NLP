@@ -1,4 +1,5 @@
 
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
@@ -27,6 +28,7 @@ tokens_to_indices = {token: idx for idx, (token, _) in enumerate(vocab.items())}
 
 indexed_data = [CORPUS.apply(lambda text: [tokens_to_indices[token] for token in tokenize(text)])]
 
-print("Vocabulary:", vocab)
-print("Token to Index:", tokens_to_indices)
-print("Indexed Data:", indexed_data)
+# indexed_tensors = [torch.tensor(seq)]
+
+padded_data = torch.nn.utils.rnn.pad_sequence([torch.tensor(seq) for seq in indexed_data[0]], batch_first=True)
+print(type(padded_data))
