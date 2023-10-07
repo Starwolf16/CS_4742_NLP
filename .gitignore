@@ -1,0 +1,9 @@
+# Ignore these Directories
+
+
+# Ignore these Specific Files
+__init__.py
+
+# Ignore these Extensions
+
+
