@@ -23,7 +23,7 @@ class AutoEncoder():
             nn.MaxPool1d(kernel_size=5, stride=5, padding=1),
             nn.Conv1d(32, 48, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
-            nn.Conv1d(38, 64, kernel_size=5, stride=5, padding=1),
+            nn.Conv1d(48, 64, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=5, stride=5, padding=1),
         )
