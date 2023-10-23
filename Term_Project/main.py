@@ -1,4 +1,5 @@
 ### IMPORTS ###
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,6 +12,13 @@ from sys import exit
 from time import time
 from torch.utils.data import Dataset, DataLoader
 from torch.cuda.amp import GradScaler
+
+# Set up Argument Parser
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-e', '--epochs', type=int, help='Specify the number of epochs for training')
+parser.add_argument('-lr', '--learning_rate', type=float, help='Specify the learning rate for training')
+
 
 ### DATA PREPARATION ###
 # Initialize the language model for tokenization
