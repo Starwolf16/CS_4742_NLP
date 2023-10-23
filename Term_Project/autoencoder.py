@@ -29,14 +29,14 @@ class AutoEncoder():
         )
 
         self.decoder = nn.Sequential(
-            nn.Conv1d(64, 48, kernel_size=5, stride=5, padding=1),
+            nn.ConvTranspose1d(64, 48, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
-            nn.Conv1d(48, 32, kernel_size=5, stride=5, padding=1),
+            nn.ConvTranspose1d(48, 32, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=5, stride=5, padding=1),
-            nn.Conv1d(32, 16, kernel_size=5, stride=5, padding=1),
+            nn.ConvTranspose1d(32, 16, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
-            nn.Conv1d(16, 1, kernel_size=5, stride=5, padding=1),
+            nn.ConvTranspose1d(16, 1, kernel_size=5, stride=5, padding=1),
             nn.ReLU(),
             nn.MaxPool1d(kernel_size=5, stride=5, padding=1),
         )
