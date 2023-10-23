@@ -56,10 +56,10 @@ padded_data = torch.nn.utils.rnn.pad_sequence([torch.tensor(seq) for seq in inde
 # Split the data for training and testing
 DATA_train, DATA_test, labels_train, labels_test = train_test_split(
     padded_data, 
-    labels, 
+    labels,
     train_size=.7, 
     random_state=42, 
-    stratify=True
+    stratify=labels
 )
 
 # Define Dataset for data encapsulation
@@ -70,6 +70,9 @@ class text_dataset(Dataset):
     
     def __getitem__(self, index):
         return [self.data[index], self.labels[index]]
+    
+    def __len__(self):
+        return(len(labels))
     
 # Instantiate Dataset instances
 train_set = text_dataset(DATA_train, labels_train)
