@@ -19,6 +19,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-e', '--epochs', type=int, help='Specify the number of epochs for training')
 parser.add_argument('-lr', '--learning_rate', type=float, help='Specify the learning rate for training')
 
+args = parser.parse_args()
+
+num_epochs = args.epochs
+learning_rate = args.learning_rate
+
 
 ### DATA PREPARATION ###
 # Initialize the language model for tokenization
