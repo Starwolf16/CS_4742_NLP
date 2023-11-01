@@ -1,5 +1,31 @@
 ### IMPORTS ###
 import argparse
+import os
+
+# Define file type checkers
+def model_type_check(file):
+    allowed_type = '.pth'
+
+    filename, file_extension = os.path.splitext(file)
+    if file_extension != allowed_type:
+        parser.error('Please ensure your checkpoint file is of type \'.pth\'')
+
+    return file
+
+
+# Set up Argument Parser
+parser = argparse.ArgumentParser()
+
+parser.add_argument('-e', '--epochs', type=int, default=10,
+                    help='Specify the number of epochs for training. Default == 10')
+parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
+                    help='Specify the learning rate for training. Default == 0.001')
+parser.add_argument('-c', '--checkpoint', type=lambda checkpoint_file:model_type_check(checkpoint_file),
+                    help='Specify a file to use as a model checkpoint. Must be of type .pth')
+
+args = parser.parse_args()
+
+import autoencoder
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -12,14 +38,6 @@ from sys import exit
 from time import time
 from torch.utils.data import Dataset, DataLoader
 from torch.cuda.amp import GradScaler
-
-# Set up Argument Parser
-parser = argparse.ArgumentParser()
-
-parser.add_argument('-e', '--epochs', type=int, help='Specify the number of epochs for training')
-parser.add_argument('-lr', '--learning_rate', type=float, help='Specify the learning rate for training')
-
-args = parser.parse_args()
 
 num_epochs = args.epochs
 learning_rate = args.learning_rate
@@ -86,6 +104,11 @@ test_set = text_dataset(DATA_test, labels_test)
 # Instantiate the dataloaders
 train_loader = DataLoader(train_set, batch_size=10, shuffle=True)
 test_loader = DataLoader(test_set, batch_size=5, shuffle=True)
+
+
+### MODEL SET-UP ###
+
+
 
 
 ### TRAINING PHASE ###
