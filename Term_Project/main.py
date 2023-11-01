@@ -39,6 +39,9 @@ from time import time
 from torch.utils.data import Dataset, DataLoader
 from torch.cuda.amp import GradScaler
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'Running PyTorch v{torch.__version__} on {device} device')
+
 num_epochs = args.epochs
 learning_rate = args.learning_rate
 
@@ -75,6 +78,7 @@ indexed_data = [CORPUS.apply(lambda text: [tokens_to_indices[token] for token in
 
 # Pad the data since all the samples are not the same length
 padded_data = torch.nn.utils.rnn.pad_sequence([torch.tensor(seq) for seq in indexed_data[0]], batch_first=True)
+print(padded_data.shape)
 
 # Split the data for training and testing
 DATA_train, DATA_test, labels_train, labels_test = train_test_split(
@@ -108,7 +112,9 @@ test_loader = DataLoader(test_set, batch_size=5, shuffle=True)
 
 ### MODEL SET-UP ###
 
-
+if not args.checkpoint:
+    model = autoencoder.AutoEncoder(padded_data.shape[1], 0)
+    
 
 
 ### TRAINING PHASE ###
