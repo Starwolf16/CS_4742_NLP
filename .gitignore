@@ -1,5 +1,6 @@
 # Ignore these Directories
 Assignment_4/BBC_News_Summary
+*/__pycache__/
 
 # Ignore these Specific Files
 __init__.py
