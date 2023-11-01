@@ -127,11 +127,15 @@ def extract_answer_from_document(document):
     else:
         return "No answer found in the document."
 
-
-question = args.question
-question_tokens = process_question(question)
-documents = retrieve_documents(question_tokens)
-print(len(documents))
-answer = select_answer(question, documents)
-print("Question:", question)
-print("Answer:", answer)
+question = ''
+while True:
+    print("Use 'Done' to exit")
+    question = input('What is your question? ')
+    if question.lower() == 'done':
+        break
+    question_tokens = process_question(question)
+    documents = retrieve_documents(question_tokens)
+    print(len(documents))
+    answer = select_answer(question, documents)
+    print("Question:", question)
+    print("Answer:", answer)
