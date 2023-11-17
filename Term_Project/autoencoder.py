@@ -2,8 +2,9 @@ import torch
 import torch.nn as nn
 from math import floor
 
-class AutoEncoder():
+class AutoEncoder(nn.Module):
     def __init__(self, in_features, latent_size):
+        super().__init__()
         self.in_feature = in_features
         self.in_feature_large = floor(self.in_feature * 0.75)
         self.in_feature_med = floor(self.in_feature * 0.5)
@@ -17,26 +18,16 @@ class AutoEncoder():
         }
 
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 16, kernel_size=5, stride=5, padding=2),
-            nn.ReLU(),
-            nn.Conv1d(16, 32, kernel_size=5, stride=5, padding=1),
-            nn.ReLU(),
-            nn.Conv1d(32, 48, kernel_size=5, stride=5, padding=1),
-            nn.ReLU(),
-            nn.Conv1d(48, 64, kernel_size=5, stride=5, padding=1),
+            nn.Conv1d(1, 16, kernel_size=5, stride=5),
             nn.ReLU(),
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(64, 48, kernel_size=5, stride=5, padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose1d(48, 32, kernel_size=5, stride=5, padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose1d(32, 16, kernel_size=5, stride=5, padding=1),
-            nn.ReLU(),
-            nn.ConvTranspose1d(16, 1, kernel_size=5, stride=5, padding=1),
+            nn.ConvTranspose1d(16, 1, kernel_size=9, stride=5),
             nn.ReLU(),
         )
+
+
 
         # self.fully_connected = nn.Sequential(
         #     nn.Linear(self.in_feature, self.in_feature_large),
@@ -58,9 +49,11 @@ class AutoEncoder():
         # )
 
     
-    def forward_pass(self, text, target):
+    def forward(self, text: torch.Tensor) -> torch.Tensor:
+        text = text.view(-1, 1, text.size(-1))
         latent_rep = self.encoder(text)
         reconstructed = self.decoder(latent_rep)
+        reconstructed = reconstructed.squeeze(dim = 1)
 
         return reconstructed
     
