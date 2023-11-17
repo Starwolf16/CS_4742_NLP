@@ -18,35 +18,15 @@ class AutoEncoder(nn.Module):
         }
 
         self.encoder = nn.Sequential(
-            nn.Conv1d(1, 16, kernel_size=5, stride=5),
+            nn.Conv1d(1, 16, kernel_size=10, stride=5),
             nn.ReLU(),
         )
 
         self.decoder = nn.Sequential(
-            nn.ConvTranspose1d(16, 1, kernel_size=9, stride=5),
+            nn.ConvTranspose1d(16, 1, kernel_size=14, stride=5),
             nn.ReLU(),
         )
 
-
-
-        # self.fully_connected = nn.Sequential(
-        #     nn.Linear(self.in_feature, self.in_feature_large),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_large, self.in_feature_med),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_med, self.in_feature_small),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_small, self.latent_size),
-        #     nn.ReLU(),
-        #     nn.Linear(self.latent_size, self.in_feature_small),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_small, self.in_feature_med),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_med, self.in_feature_large),
-        #     nn.ReLU(),
-        #     nn.Linear(self.in_feature_large, self.in_feature),
-        #     nn.ReLU(),
-        # )
 
     
     def forward(self, text: torch.Tensor) -> torch.Tensor:
