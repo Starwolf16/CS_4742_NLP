@@ -10,3 +10,4 @@ __init__.py
 
 Term_Project/loss_plot.svg
 Term_Project/model.pth
+Term_Project/model_and_optim_config.txt
