@@ -22,6 +22,8 @@ parser.add_argument('-lr', '--learning_rate', type=float, default=0.001,
                     help='Specify the learning rate for training. Default == 0.001')
 parser.add_argument('-c', '--checkpoint', type=lambda checkpoint_file:model_type_check(checkpoint_file),
                     help='Specify a file to use as a model checkpoint. Must be of type .pth')
+parser.add_argument('-g', '--graph', action='store_true', default=True,
+                    help='Print out a graph of the losses over epochs')
 
 args = parser.parse_args()
 
@@ -30,6 +32,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import torch
+import torch.amp
+import torch.optim as optim
 
 from collections import Counter
 from spacy.lang.en import English
@@ -40,7 +44,7 @@ from torch.utils.data import Dataset, DataLoader
 from torch.cuda.amp import GradScaler
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
-print(f'Running PyTorch v{torch.__version__} on {device} device')
+print(f'-----\nRunning PyTorch v{torch.__version__} on {device} device\n-----\n')
 
 num_epochs = args.epochs
 learning_rate = args.learning_rate
@@ -78,35 +82,37 @@ indexed_data = [CORPUS.apply(lambda text: [tokens_to_indices[token] for token in
 
 # Pad the data since all the samples are not the same length
 padded_data = torch.nn.utils.rnn.pad_sequence([torch.tensor(seq) for seq in indexed_data[0]], batch_first=True)
-print(padded_data.shape)
+
+# Split off the spam emails 
+ham_emails = padded_data[labels == 0]
+spam_emails = padded_data[labels == 1]
 
 # Split the data for training and testing
-DATA_train, DATA_test, labels_train, labels_test = train_test_split(
-    padded_data, 
-    labels,
+DATA_train, DATA_test = train_test_split(
+    ham_emails, 
     train_size=.7, 
     random_state=42, 
-    stratify=labels
 )
+
 
 # Define Dataset for data encapsulation
 class text_dataset(Dataset):
-    def __init__(self, data_tensor: torch.Tensor, labels_tensor: torch.Tensor) -> None:
+    def __init__(self, data_tensor: torch.Tensor) -> None:
         self.data = data_tensor
-        self.labels = labels_tensor
     
     def __getitem__(self, index):
-        return [self.data[index], self.labels[index]]
+        return self.data[index]
     
-    def __len__(self):
-        return(len(labels))
+    def __len__(self) -> int:
+        return(self.data.size()[0])
     
 # Instantiate Dataset instances
-train_set = text_dataset(DATA_train, labels_train)
-test_set = text_dataset(DATA_test, labels_test)
+train_set = text_dataset(DATA_train)
+test_set = text_dataset(DATA_test)
+
 
 # Instantiate the dataloaders
-train_loader = DataLoader(train_set, batch_size=10, shuffle=True)
+train_loader = DataLoader(train_set, batch_size=8, shuffle=True)
 test_loader = DataLoader(test_set, batch_size=5, shuffle=True)
 
 
@@ -114,10 +120,63 @@ test_loader = DataLoader(test_set, batch_size=5, shuffle=True)
 
 if not args.checkpoint:
     model = autoencoder.AutoEncoder(padded_data.shape[1], 0)
-    
+    optimizer = optim.Adam(params=model.parameters(), lr=learning_rate)
+    loss_fn = torch.nn.MSELoss()
+    scaler = GradScaler()
+else: 
+    kwargs, model_params = torch.load(args.checkpoint)
+    model = autoencoder.AutoEncoder(kwargs)
+    model.load_state_dict(model_params)
+
+# Move the model to the GPU if available
+if device == 'cuda':
+    model = model.to(device)
 
 
 ### TRAINING PHASE ###
 
+loss_list = list()
+
 start_time = time()
+
+for epoch in range(num_epochs):
+    for email in train_loader:
+        optimizer.zero_grad()
+
+        # Move the emails tensor to cuda 
+        email = email.to(device, torch.float)
+        
+        # Use the torch.autocast context manager to use AMP for tensor cores
+        with torch.autocast(device_type=device):
+
+            # Run the email through the Autoencoder newtork
+            output = model(email)
+
+            # Calculate the Loss
+            loss = loss_fn(output, email)
+
+        # Use GradScaler to backpropoate the loss 
+        scaler.scale(loss).backward()
+        scaler.step(optimizer)
+        scaler.update()
+
+    loss_list.append(loss.item())
+
+
+print('\n\n----- TRAINING STATS -----')
+print(f'Training Time: {(time() - start_time):.2f} secs')
+print(f'Maximum Loss: {np.max(loss_list):.3f}')
+print(f'Minimum Loss: {np.min(loss_list):.3f}')
+print(f'Average Loss: {np.average(loss_list):.3f}')
+print(f'\nLoss List: {loss_list}')
+
+if args.graph:
+    plt.figure()
+    print([y for y in range(num_epochs)])
+    plt.plot([y for y in range(num_epochs)], loss_list)
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.savefig('loss_plot.svg')
+
+
 
