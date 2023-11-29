@@ -5,16 +5,16 @@ from math import floor
 class AutoEncoder(nn.Module):
     def __init__(self, in_features, latent_size):
         super().__init__()
-        self.in_feature = in_features
-        self.in_feature_large = floor(self.in_feature * 0.75)
-        self.in_feature_med = floor(self.in_feature * 0.5)
-        self.in_feature_small = floor(self.in_feature * 0.25)
+        self.in_features = in_features
+        self.in_feature_large = floor(self.in_features * 0.75)
+        self.in_feature_med = floor(self.in_features * 0.5)
+        self.in_feature_small = floor(self.in_features * 0.25)
 
         self.latent_size = latent_size
 
         self.kwargs = {
-            'In Features': self.in_feature, 
-            'Latent_size': self.latent_size
+            'in_features': self.in_features, 
+            'latent_size': self.latent_size
         }
 
         self.encoder = nn.Sequential(
