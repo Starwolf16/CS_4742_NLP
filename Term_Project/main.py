@@ -148,7 +148,8 @@ if not args.checkpoint:
     scaler = GradScaler()
 else: 
     kwargs, model_params = torch.load(args.checkpoint)
-    model = autoencoder.AutoEncoder(kwargs)
+    print(kwargs)
+    model = autoencoder.AutoEncoder(**kwargs)
     model.load_state_dict(model_params)
 
 # Move the model to the GPU if available
@@ -217,6 +218,7 @@ model.eval()
 with torch.no_grad():
     for emails, label in test_loader:
         emails = emails.to(device, torch.float)
+        print(emails.shape)
 
         with torch.autocast(device_type=device):
             output = model(emails)
@@ -228,7 +230,7 @@ with torch.no_grad():
 
 
 # Get the Threshold for recon_errors
-threshold = np.percentile(recon_error_list, 25)
+threshold = np.percentile(recon_error_list, 75)
 
 # Use the reconstruction error and threshold to determine ham vs spam
 recon_error_list = np.array(recon_error_list)
