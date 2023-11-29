@@ -171,8 +171,7 @@ if not args.checkpoint:
 
     for epoch in tqdm(range(num_epochs)):
         for emails in train_loader:
-            optimizer.zero_grad()
-
+            
             # Move the emails tensor to cuda 
             emails = emails.to(device, torch.float)
             
@@ -186,6 +185,7 @@ if not args.checkpoint:
                 loss = loss_fn(output, emails)
 
             # Use GradScaler to backpropoate the loss 
+            optimizer.zero_grad()
             scaler.scale(loss).backward()
             scaler.step(optimizer)
             scaler.update()
